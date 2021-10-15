@@ -17,10 +17,13 @@ type Server struct {
 	proxy  *httputil.ReverseProxy
 	logger zerolog.Logger
 
+	apiPrefix string
 	apiRoutes map[string]http.HandlerFunc
+
+	m []middleware
 }
 
-func New(logger zerolog.Logger) *Server {
+func New(logger zerolog.Logger, apiPrefix string) *Server {
 	return &Server{
 		lock: &sync.RWMutex{},
 		proxy: &httputil.ReverseProxy{
@@ -29,8 +32,9 @@ func New(logger zerolog.Logger) *Server {
 				log.Err(err).CallerSkipFrame(4).Msg("proxy error")
 			},
 		},
-		engine: matcher.NewEngine(),
-		logger: logger,
+		engine:    matcher.NewEngine(),
+		logger:    logger,
+		apiPrefix: apiPrefix,
 	}
 }
 

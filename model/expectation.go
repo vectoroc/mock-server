@@ -1,8 +1,8 @@
 package model
 
 type Expectation struct {
-	Id                           string `json:"id,omitempty"`
-	Priority                     int
+	Id                           string                        `json:"id,omitempty"`
+	Priority                     int                           `json:"priority,omitempty"`
 	HttpRequest                  HttpRequest                   `json:"httpRequest,omitempty"`
 	HttpResponse                 *HttpResponse                 `json:"httpResponse,omitempty"`
 	HttpResponseTemplate         *HttpTemplate                 `json:"httpResponseTemplate,omitempty"`

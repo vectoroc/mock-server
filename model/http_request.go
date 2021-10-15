@@ -11,12 +11,3 @@ type HttpRequest struct {
 	KeepAlive             *bool           `json:"keepAlive,omitempty"`
 	// SocketAddress         *SocketAddress  `json:"socketAddress,omitempty"`
 }
-
-func NewHttpRequest() HttpRequest {
-	return HttpRequest{
-		// preallocate custom container types otherwise UnmarshalJSON will panic
-		Headers:               KeyToMultiValue{},
-		Cookies:               KeyToValue{},
-		QueryStringParameters: KeyToMultiValue{},
-	}
-}

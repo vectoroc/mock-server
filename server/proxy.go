@@ -30,10 +30,16 @@ func (s *Server) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		log.Print("direct proxy request")
 		if req.Method == "CONNECT" {
 			ConnectMethod(resp, req)
-		} else {
-			s.proxy.ServeHTTP(resp, req)
+			return
 		}
 
+		if req.URL.Host == "" {
+			log.Error().Msg("empty host header")
+			s.responseText(resp, http.StatusBadRequest, "URL expected")
+			return
+		}
+
+		s.proxy.ServeHTTP(resp, req)
 		return
 	}
 

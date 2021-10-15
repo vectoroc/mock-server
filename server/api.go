@@ -2,49 +2,63 @@ package server
 
 import (
 	"encoding/json"
+	"github.com/rs/zerolog"
 	"mock-server/model"
 	"net/http"
+	"strings"
 )
 
 func (s *Server) InitAPI() {
 	s.apiRoutes = map[string]http.HandlerFunc{
-		"/expectation":    s.Expectation,
-		"/clear":          s.Clear,
-		"/reset":          s.Reset,
-		"/retrieve":       s.Retrieve,
-		"/verify":         s.notImplemented,
-		"/verifySequence": s.notImplemented,
-		"/responseStatus": s.notImplemented,
-		"/bind":           s.notImplemented,
-		"/stop":           s.notImplemented,
+		s.apiPrefix + "/expectation":    s.Expectation,
+		s.apiPrefix + "/clear":          s.Clear,
+		s.apiPrefix + "/reset":          s.Reset,
+		s.apiPrefix + "/retrieve":       s.Retrieve,
+		s.apiPrefix + "/verify":         s.notImplemented,
+		s.apiPrefix + "/verifySequence": s.notImplemented,
+		s.apiPrefix + "/responseStatus": s.notImplemented,
+		s.apiPrefix + "/bind":           s.notImplemented,
+		s.apiPrefix + "/stop":           s.notImplemented,
 	}
 }
 
 func (s *Server) Expectation(rw http.ResponseWriter, req *http.Request) {
+	log := zerolog.Ctx(req.Context())
+
 	params := &model.Expectations{}
 	if !s.validateAPIRequest(rw, req, &params) {
 		return
 	}
 	list := params.ToArray()
 	s.engine.AddExpectations(list)
+	log.Info().Int("added", len(list)).Send()
 	s.responseJSON(rw, http.StatusCreated, list)
 }
 
 func (s *Server) Clear(rw http.ResponseWriter, req *http.Request) {
+	log := zerolog.Ctx(req.Context())
+
 	exp := &model.HttpRequest{}
 	if !s.validateAPIRequest(rw, req, &exp) {
 		return
 	}
-	s.engine.ClearBy(exp)
-	s.responseStatus(rw, http.StatusOK)
+	ids := s.engine.ClearBy(exp)
+	log.Info().Int("expectations", len(ids)).Send()
+	s.responseJSON(rw, http.StatusOK, ids)
 }
 
 func (s *Server) Reset(rw http.ResponseWriter, req *http.Request) {
+	log := zerolog.Ctx(req.Context())
+
 	s.engine.Reset()
+	log.Info().Send()
 	s.responseStatus(rw, http.StatusOK)
 }
 
 func (s *Server) Retrieve(rw http.ResponseWriter, req *http.Request) {
+	log := zerolog.Ctx(req.Context())
+	log.Info().Send()
+
 	format := req.URL.Query().Get("format")
 	sType := req.URL.Query().Get("type")
 
@@ -73,10 +87,17 @@ func (s *Server) Retrieve(rw http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func (s *Server) reqContentType(req *http.Request) string {
+	header := req.Header.Get("Content-Type")
+	return strings.TrimSpace(strings.Split(header, ";")[0])
+}
+
 func (s *Server) validateAPIRequest(rw http.ResponseWriter, req *http.Request, params interface{}) bool {
-	ct := req.Header.Get("Content-Type")
+	log := zerolog.Ctx(req.Context())
+
+	ct := s.reqContentType(req)
 	if ct != "application/json" {
-		s.logger.Warn().Str("content-type", ct).Msg("incorrect request format")
+		log.Warn().Str("content-type", ct).Msg("incorrect request format")
 		s.responseText(rw, http.StatusBadRequest, "incorrect request format")
 		return false
 	}
@@ -84,7 +105,7 @@ func (s *Server) validateAPIRequest(rw http.ResponseWriter, req *http.Request, p
 	defer req.Body.Close()
 	err := json.NewDecoder(req.Body).Decode(params)
 	if err != nil {
-		s.logger.Err(err).Msg("failed to unmarshal body")
+		log.Err(err).Msg("failed to unmarshal body")
 		s.responseText(rw, http.StatusNotAcceptable, "invalid expectation")
 		return false
 	}
@@ -115,5 +136,7 @@ func (s *Server) responseStatus(rw http.ResponseWriter, status int) {
 }
 
 func (s *Server) notImplemented(rw http.ResponseWriter, req *http.Request) {
+	log := zerolog.Ctx(req.Context())
+	log.Warn().Msg("request handler is not implemented")
 	s.responseStatus(rw, http.StatusNotImplemented)
 }

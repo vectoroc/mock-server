@@ -6,13 +6,13 @@ import (
 
 // BodyWithContentType - response body
 type BodyWithContentType struct {
-	Not         bool
-	Type        string
-	Base64Bytes string `json:"base64Bytes"`
-	ContentType string `json:"contentType"`
-	Json        string
-	String      string
-	Xml         string
+	Not         bool   `json:"not,omitempty"`
+	Type        string `json:"type"`
+	Base64Bytes string `json:"base64Bytes,omitempty"`
+	ContentType string `json:"contentType,omitempty"`
+	Json        string `json:"json,omitempty"`
+	String      string `json:"string,omitempty"`
+	Xml         string `json:"xml,omitempty"`
 }
 
 func (b *BodyWithContentType) UnmarshalJSON(data []byte) error {

@@ -46,9 +46,7 @@ func (e *Expectations) MarshalJSON() (data []byte, err error) {
 }
 
 func unmarshalOneExpectation(data []byte) (*Expectation, error) {
-	ex := &Expectation{
-		HttpRequest: NewHttpRequest(),
-	}
+	ex := &Expectation{}
 
 	err := json.Unmarshal(data, ex)
 	if err != nil {

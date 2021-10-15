@@ -6,15 +6,19 @@ import (
 
 type KeyToMultiValue map[string][]string
 
-func (kv KeyToMultiValue) UnmarshalJSON(data []byte) error {
+func (kv *KeyToMultiValue) UnmarshalJSON(data []byte) error {
 	var list []struct {
 		Name   string
 		Values []string
 	}
 
+	if *kv == nil {
+		kv = &KeyToMultiValue{}
+	}
+
 	if err := json.Unmarshal(data, &list); err == nil {
 		for _, item := range list {
-			kv[item.Name] = item.Values
+			(*kv)[item.Name] = item.Values
 		}
 
 		return nil
@@ -28,13 +32,13 @@ func (kv KeyToMultiValue) UnmarshalJSON(data []byte) error {
 	for k, val := range m {
 		switch casted := val.(type) {
 		case string:
-			kv[k] = []string{casted}
+			(*kv)[k] = []string{casted}
 
 		case []interface{}:
-			kv[k] = make([]string, len(casted))
+			(*kv)[k] = make([]string, len(casted))
 			var ok bool
 			for i, item := range casted {
-				kv[k][i], ok = item.(string)
+				(*kv)[k][i], ok = item.(string)
 				if !ok {
 					return ErrBadFormat
 				}

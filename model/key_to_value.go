@@ -4,15 +4,19 @@ import "encoding/json"
 
 type KeyToValue map[string]string
 
-func (kv KeyToValue) UnmarshalJSON(data []byte) error {
+func (kv *KeyToValue) UnmarshalJSON(data []byte) error {
 	var list []struct {
 		Name  string
 		Value string
 	}
 
+	if *kv == nil {
+		kv = &KeyToValue{}
+	}
+
 	if err := json.Unmarshal(data, &list); err == nil {
 		for _, item := range list {
-			kv[item.Name] = item.Value
+			(*kv)[item.Name] = item.Value
 		}
 
 		return nil
@@ -24,7 +28,7 @@ func (kv KeyToValue) UnmarshalJSON(data []byte) error {
 	}
 
 	for k, val := range m {
-		kv[k] = val
+		(*kv)[k] = val
 	}
 
 	return nil

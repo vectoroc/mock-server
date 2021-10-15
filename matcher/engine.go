@@ -14,7 +14,8 @@ type Engine struct {
 
 func NewEngine() *Engine {
 	return &Engine{
-		lock: &sync.RWMutex{},
+		lock:         &sync.RWMutex{},
+		expectations: []*model.Expectation{},
 	}
 }
 
@@ -49,7 +50,10 @@ func (e *Engine) AddExpectations(list []*model.Expectation) {
 	}
 }
 
-func (e *Engine) ClearBy(exp *model.HttpRequest) {
+func (e *Engine) ClearBy(exp *model.HttpRequest) []string {
+	e.lock.Lock()
+	defer e.lock.Unlock()
+
 	NormalizeRequest(exp)
 
 	exclude := make(map[int]bool)
@@ -61,9 +65,12 @@ func (e *Engine) ClearBy(exp *model.HttpRequest) {
 
 	newExpectations := make([]*model.Expectation, len(e.expectations)-len(exclude))
 
+	var excludedIds []string
+
 	addIdx := 0
 	for idx, e := range e.expectations {
 		if exclude[idx] {
+			excludedIds = append(excludedIds, e.Id)
 			continue
 		}
 		newExpectations[addIdx] = e
@@ -71,6 +78,7 @@ func (e *Engine) ClearBy(exp *model.HttpRequest) {
 	}
 
 	e.expectations = newExpectations
+	return excludedIds
 }
 
 func (e *Engine) Reset() {
