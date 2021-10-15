@@ -10,6 +10,11 @@ import (
 )
 
 func (s *Server) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+	if cb, ok := s.apiRoutes[req.URL.Path]; ok && req.Method == "PUT" {
+		cb(resp, req)
+		return
+	}
+
 	log := hlog.FromRequest(req)
 
 	// match expectation

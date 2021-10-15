@@ -54,12 +54,12 @@ func TestMatchRequest(t *testing.T) {
 	t.Run("match should normalize header keys", func(t *testing.T) {
 		m := model.HttpRequest{
 			Headers: model.KeyToMultiValue{
-				"Accept-Content": []string{"text/plain"},
+				"Accept-Content": []string{"responseText/plain"},
 			},
 		}
 
 		req, err := http.NewRequest("GET", "http://ya.ru/test", nil)
-		req.Header.Add("accept-content", "text/plain")
+		req.Header.Add("accept-content", "responseText/plain")
 		assert.NoError(t, err)
 
 		ok, err := matchHttpRequest(&m, req)
@@ -107,29 +107,29 @@ func TestMatchBody(t *testing.T) {
 		match       bool
 	}{
 		{
-			name:   "simple text match",
-			body:   "some body text",
-			expect: model.Body{String: "some body text"},
+			name:   "simple responseText match",
+			body:   "some body responseText",
+			expect: model.Body{String: "some body responseText"},
 			match:  true,
 		},
 		{
-			name:   "substring text match",
-			body:   "some relatively long text",
+			name:   "substring responseText match",
+			body:   "some relatively long responseText",
 			expect: model.Body{SubString: true, String: " relatively "},
 			match:  true,
 		},
 		{
-			name:        "text match with content type",
-			body:        "text text",
-			contentType: "text/plain",
-			expect:      model.Body{ContentType: "text/plain", String: "text text"},
+			name:        "responseText match with content type",
+			body:        "responseText responseText",
+			contentType: "responseText/plain",
+			expect:      model.Body{ContentType: "responseText/plain", String: "responseText responseText"},
 			match:       true,
 		},
 		{
-			name:        "text not match",
-			body:        "text text 1",
-			contentType: "text/plain",
-			expect:      model.Body{ContentType: "text/plain", String: "text text 2", Not: true},
+			name:        "responseText not match",
+			body:        "responseText responseText 1",
+			contentType: "responseText/plain",
+			expect:      model.Body{ContentType: "responseText/plain", String: "responseText responseText 2", Not: true},
 			match:       true,
 		},
 	}

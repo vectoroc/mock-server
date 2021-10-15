@@ -16,6 +16,8 @@ type Server struct {
 	engine *matcher.Engine
 	proxy  *httputil.ReverseProxy
 	logger zerolog.Logger
+
+	apiRoutes map[string]http.HandlerFunc
 }
 
 func New(logger zerolog.Logger) *Server {
@@ -75,7 +77,7 @@ func ProcessHttpResponse(r *model.HttpResponse, w http.ResponseWriter) {
 		w.Header().Add("Content-Type", "application/json")
 
 	case r.Body.Xml > "":
-		w.Header().Add("Content-Type", "text/html")
+		w.Header().Add("Content-Type", "responseText/html")
 	}
 
 	status := http.StatusOK

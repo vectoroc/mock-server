@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/hlog"
 	stdlog "log"
@@ -14,8 +13,7 @@ import (
 )
 
 var (
-	proxyAddr = flag.String("api", "127.0.0.1:8000", "")
-	apiAddr   = flag.String("proxy", "127.0.0.1:8001", "")
+	addr = flag.String("api", "127.0.0.1:8000", "")
 )
 
 func main() {
@@ -26,31 +24,12 @@ func main() {
 
 	ctx := logger.WithContext(context.Background())
 
-	r := gin.Default()
-
 	s := server.New(logger)
+	s.InitAPI()
 
-	if err := s.InitRoutes(r); err != nil {
-		panic(err)
-	}
+	logger.Info().Str("add", *addr).Msg("starting mock-server")
 
-	go proxyListener(ctx, s, *proxyAddr)
-	initAPIListener(ctx, r, *apiAddr)
-}
-
-func initAPIListener(ctx context.Context, r *gin.Engine, addr string) {
-	l, err := net.Listen("tcp", addr)
-	if err != nil {
-		panic(err)
-	}
-
-	if err := r.RunListener(l); err != nil {
-		panic(err)
-	}
-}
-
-func proxyListener(ctx context.Context, s http.Handler, addr string) {
-	l, err := net.Listen("tcp", addr)
+	l, err := net.Listen("tcp", *addr)
 	if err != nil {
 		panic(err)
 	}

@@ -73,7 +73,7 @@ func MatchBody(body, contentType string, expect *model.Body) bool {
 		expectedBody = expect.Json
 
 	case expect.Xml != "":
-		expectedContentType = "text/xml"
+		expectedContentType = "responseText/xml"
 		expectedBody = expect.Xml
 
 	case expect.String != "":
