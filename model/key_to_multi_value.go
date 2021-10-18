@@ -4,7 +4,13 @@ import (
 	"encoding/json"
 )
 
-type KeyToMultiValue map[string][]string
+type KeyToMultiValue struct {
+	Values map[string][]string
+}
+
+func (kv *KeyToMultiValue) MarshalJSON() ([]byte, error) {
+	return json.Marshal(kv.Values)
+}
 
 func (kv *KeyToMultiValue) UnmarshalJSON(data []byte) error {
 	var list []struct {
@@ -12,13 +18,13 @@ func (kv *KeyToMultiValue) UnmarshalJSON(data []byte) error {
 		Values []string
 	}
 
-	if *kv == nil {
-		kv = &KeyToMultiValue{}
+	if kv.Values == nil {
+		kv.Values = make(map[string][]string)
 	}
 
 	if err := json.Unmarshal(data, &list); err == nil {
 		for _, item := range list {
-			(*kv)[item.Name] = item.Values
+			kv.Values[item.Name] = item.Values
 		}
 
 		return nil
@@ -32,13 +38,13 @@ func (kv *KeyToMultiValue) UnmarshalJSON(data []byte) error {
 	for k, val := range m {
 		switch casted := val.(type) {
 		case string:
-			(*kv)[k] = []string{casted}
+			kv.Values[k] = []string{casted}
 
 		case []interface{}:
-			(*kv)[k] = make([]string, len(casted))
+			kv.Values[k] = make([]string, len(casted))
 			var ok bool
 			for i, item := range casted {
-				(*kv)[k][i], ok = item.(string)
+				kv.Values[k][i], ok = item.(string)
 				if !ok {
 					return ErrBadFormat
 				}

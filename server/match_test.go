@@ -12,7 +12,9 @@ func TestMatchRequest(t *testing.T) {
 	t.Run("match by host", func(t *testing.T) {
 		m := model.HttpRequest{
 			Headers: model.KeyToMultiValue{
-				"Host": []string{"ya.ru"},
+				Values: map[string][]string{
+					"Host": {"ya.ru"},
+				},
 			},
 		}
 
@@ -28,7 +30,9 @@ func TestMatchRequest(t *testing.T) {
 	t.Run("match by host and path", func(t *testing.T) {
 		m := model.HttpRequest{
 			Headers: model.KeyToMultiValue{
-				"Host": []string{"ya.ru"},
+				Values: map[string][]string{
+					"Host": []string{"ya.ru"},
+				},
 			},
 			Path: "/test",
 		}
@@ -54,7 +58,9 @@ func TestMatchRequest(t *testing.T) {
 	t.Run("match should normalize header keys", func(t *testing.T) {
 		m := model.HttpRequest{
 			Headers: model.KeyToMultiValue{
-				"Accept-Content": []string{"responseText/plain"},
+				Values: map[string][]string{
+					"Accept-Content": []string{"responseText/plain"},
+				},
 			},
 		}
 
@@ -69,8 +75,10 @@ func TestMatchRequest(t *testing.T) {
 
 	t.Run("match by query params", func(t *testing.T) {
 		m := model.HttpRequest{
-			QueryStringParameters: map[string][]string{
-				"foo": {"bar"},
+			QueryStringParameters: model.KeyToMultiValue{
+				Values: map[string][]string{
+					"foo": {"bar"},
+				},
 			},
 		}
 
@@ -83,8 +91,10 @@ func TestMatchRequest(t *testing.T) {
 
 		t.Run("multiple values match", func(t *testing.T) {
 			m := model.HttpRequest{
-				QueryStringParameters: map[string][]string{
-					"foo": {"bar", "baz"},
+				QueryStringParameters: model.KeyToMultiValue{
+					Values: map[string][]string{
+						"foo": {"bar", "baz"},
+					},
 				},
 			}
 

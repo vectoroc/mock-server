@@ -2,7 +2,13 @@ package model
 
 import "encoding/json"
 
-type KeyToValue map[string]string
+type KeyToValue struct {
+	Values map[string]string
+}
+
+func (kv *KeyToValue) MarshalJSON() ([]byte, error) {
+	return json.Marshal(kv.Values)
+}
 
 func (kv *KeyToValue) UnmarshalJSON(data []byte) error {
 	var list []struct {
@@ -10,13 +16,13 @@ func (kv *KeyToValue) UnmarshalJSON(data []byte) error {
 		Value string
 	}
 
-	if *kv == nil {
-		kv = &KeyToValue{}
+	if kv.Values == nil {
+		kv.Values = make(map[string]string)
 	}
 
 	if err := json.Unmarshal(data, &list); err == nil {
 		for _, item := range list {
-			(*kv)[item.Name] = item.Value
+			kv.Values[item.Name] = item.Value
 		}
 
 		return nil
@@ -28,7 +34,7 @@ func (kv *KeyToValue) UnmarshalJSON(data []byte) error {
 	}
 
 	for k, val := range m {
-		(*kv)[k] = val
+		kv.Values[k] = val
 	}
 
 	return nil

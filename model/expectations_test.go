@@ -46,6 +46,8 @@ func TestExpectations_UnmarshalJSON(t *testing.T) {
 		assert.NoError(t, err)
 		require.Len(t, v.list, 1)
 		require.NotEmpty(t, v.list[0].HttpResponse)
+		require.NotEmpty(t, v.list[0].HttpResponse.Headers)
+		require.EqualValues(t, 200, v.list[0].HttpResponse.StatusCode)
 		assert.Equal(t, "10c0d440-b54c-4753-a5a8-30a731c2202d", v.list[0].Id)
 	})
 

@@ -95,16 +95,16 @@ func MatchBodyByBody(exp *model.Body, body *model.Body) bool {
 }
 
 func MatchKeyToMultiValue(expect model.KeyToMultiValue, actual model.KeyToMultiValue) bool {
-	if len(expect) == 0 {
+	if len(expect.Values) == 0 {
 		return true
 	}
 
-	if len(expect) > len(actual) {
+	if len(expect.Values) > len(actual.Values) {
 		return false
 	}
 
-	for name, values := range expect {
-		if !Equal(values, actual[name]) {
+	for name, values := range expect.Values {
+		if !Equal(values, actual.Values[name]) {
 			return false
 		}
 	}
@@ -113,16 +113,16 @@ func MatchKeyToMultiValue(expect model.KeyToMultiValue, actual model.KeyToMultiV
 }
 
 func MatchKeyToValue(expect model.KeyToValue, actual model.KeyToValue) bool {
-	if len(expect) == 0 {
+	if len(expect.Values) == 0 {
 		return true
 	}
 
-	if len(expect) > len(actual) {
+	if len(expect.Values) > len(actual.Values) {
 		return false
 	}
 
-	for name, v := range expect {
-		c, ok := actual[name]
+	for name, v := range expect.Values {
+		c, ok := actual.Values[name]
 		if !ok || c != v {
 			return false
 		}

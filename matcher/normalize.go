@@ -8,7 +8,7 @@ import (
 
 func NormalizeRequest(req *model.HttpRequest) {
 	replace := make(map[string]string)
-	for k := range req.Headers {
+	for k := range req.Headers.Values {
 		canonical := http.CanonicalHeaderKey(k)
 		if k != canonical {
 			replace[k] = canonical
@@ -16,8 +16,8 @@ func NormalizeRequest(req *model.HttpRequest) {
 	}
 
 	for k, canon := range replace {
-		req.Headers[canon] = req.Headers[k]
-		delete(req.Headers, k)
+		req.Headers.Values[canon] = req.Headers.Values[k]
+		delete(req.Headers.Values, k)
 	}
 
 	req.Method = strings.ToUpper(req.Method)

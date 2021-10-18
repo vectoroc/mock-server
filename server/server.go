@@ -62,13 +62,13 @@ func (s *Server) matchRequest(req *http.Request) (*model.Expectation, error) {
 func ProcessHttpResponse(r *model.HttpResponse, w http.ResponseWriter) {
 	ProccessDelay(r.Delay)
 
-	for name, values := range r.Headers {
+	for name, values := range r.Headers.Values {
 		for _, v := range values {
 			w.Header().Add(name, v)
 		}
 	}
 
-	for name, value := range r.Cookies {
+	for name, value := range r.Cookies.Values {
 		c := &http.Cookie{Name: name, Value: value}
 		http.SetCookie(w, c)
 	}
@@ -112,8 +112,6 @@ func ProcessHttpResponse(r *model.HttpResponse, w http.ResponseWriter) {
 		}
 		return
 	}
-
-	notImplementedError(w)
 }
 
 func ProcessHttpError(r *model.HttpError, w http.ResponseWriter) {

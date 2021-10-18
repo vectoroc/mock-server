@@ -31,7 +31,7 @@ func matchHttpRequest(exp *model.HttpRequest, req *http.Request) (bool, error) {
 		return false, nil
 	}
 
-	for name, v := range exp.QueryStringParameters {
+	for name, v := range exp.QueryStringParameters.Values {
 		queryParams, err := url.ParseQuery(req.URL.RawQuery)
 		if err != nil {
 			return false, err

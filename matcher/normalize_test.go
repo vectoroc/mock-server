@@ -9,18 +9,22 @@ import (
 func TestNormalizeRequest(t *testing.T) {
 	req := model.HttpRequest{
 		Headers: model.KeyToMultiValue{
-			"host":            {"YA.RU"},
-			"content-type":    {"text/plain"},
-			"x-forwarded-for": {"1.1.1.1"},
+			Values: map[string][]string{
+				"host":            {"YA.RU"},
+				"content-type":    {"text/plain"},
+				"x-forwarded-for": {"1.1.1.1"},
+			},
 		},
 		Method: "get",
 		Path:   "robots.txt",
 	}
 
 	expectedHeaders := model.KeyToMultiValue{
-		"Host":            {"YA.RU"},
-		"Content-Type":    {"text/plain"},
-		"X-Forwarded-For": {"1.1.1.1"},
+		Values: map[string][]string{
+			"Host":            {"YA.RU"},
+			"Content-Type":    {"text/plain"},
+			"X-Forwarded-For": {"1.1.1.1"},
+		},
 	}
 	expectedPath := "/robots.txt"
 	expcetedMethod := "GET"
