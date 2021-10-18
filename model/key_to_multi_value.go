@@ -9,6 +9,9 @@ type KeyToMultiValue struct {
 }
 
 func (kv *KeyToMultiValue) MarshalJSON() ([]byte, error) {
+	if len(kv.Values) == 0 {
+		return []byte("{}"), nil
+	}
 	return json.Marshal(kv.Values)
 }
 
