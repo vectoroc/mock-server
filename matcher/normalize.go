@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// NormalizeRequest makes it possible to match GET and get requests, Content-Type and content-type headers and so on
 func NormalizeRequest(req *model.HttpRequest) {
 	replace := make(map[string]string)
 	for k := range req.Headers.Values {
