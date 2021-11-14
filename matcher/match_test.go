@@ -69,3 +69,30 @@ func TestMatchKeyToValue(t *testing.T) {
 	exp.Values["token"] = ""
 	assert.False(t, MatchKeyToValue(exp, cookies), "all expected fields should match")
 }
+
+func TestMatchRequestByRequest(t *testing.T) {
+	expectation := model.HttpRequest{
+		Method: "GET",
+		Path:   "/test",
+	}
+	pattern1 := model.HttpRequest{
+		Method: "GET",
+		Path:   "/test",
+	}
+	pattern2 := model.HttpRequest{
+		Method: "POST",
+		Path:   "/test",
+	}
+	pattern3 := model.HttpRequest{
+		Method: "GET",
+		Path:   "/test/1",
+	}
+	pattern4 := model.HttpRequest{
+		Method: "POST",
+		Path:   "/test",
+	}
+	assert.True(t, MatchRequestByRequest(&expectation, &pattern1))
+	assert.False(t, MatchRequestByRequest(&expectation, &pattern2))
+	assert.False(t, MatchRequestByRequest(&expectation, &pattern3))
+	assert.False(t, MatchRequestByRequest(&expectation, &pattern4))
+}
