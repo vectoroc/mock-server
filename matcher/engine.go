@@ -44,30 +44,22 @@ func (e *Engine) AddExpectations(list []*model.Expectation) {
 }
 
 func (e *Engine) ClearBy(exp *model.HttpRequest) []string {
+	NormalizeRequest(exp)
+
 	e.lock.Lock()
 	defer e.lock.Unlock()
 
-	NormalizeRequest(exp)
+	var (
+		newExpectations []*model.Expectation
+		excludedIds     []string
+	)
 
-	exclude := make(map[int]bool)
-	for idx, actualExp := range e.expectations {
+	for _, actualExp := range e.expectations {
 		if MatchRequestByRequest(exp, &actualExp.HttpRequest) {
-			exclude[idx] = true
-		}
-	}
-
-	newExpectations := make([]*model.Expectation, len(e.expectations)-len(exclude))
-
-	var excludedIds []string
-
-	addIdx := 0
-	for idx, e := range e.expectations {
-		if exclude[idx] {
-			excludedIds = append(excludedIds, e.Id)
+			excludedIds = append(excludedIds, actualExp.Id)
 			continue
 		}
-		newExpectations[addIdx] = e
-		addIdx++
+		newExpectations = append(newExpectations, actualExp)
 	}
 
 	e.expectations = newExpectations
