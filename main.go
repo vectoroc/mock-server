@@ -26,14 +26,7 @@ func main() {
 	stdlog.SetOutput(logger)
 
 	s := server.New(logger, *apiPrefix)
-	s.InitAPI()
-	s.Middleware(hlog.NewHandler(logger))
-	s.Middleware(hlog.MethodHandler("method"))
-	s.Middleware(hlog.URLHandler("request"))
-	s.Middleware(hlog.UserAgentHandler("user-agent"))
-	s.Middleware(hlog.RemoteAddrHandler("ip"))
-
-	logger.Info().Str("add", *addr).Msg("starting mock-server")
+	logger.Info().Str("addr", *addr).Msg("starting mock-server")
 
 	l, err := net.Listen("tcp", *addr)
 	if err != nil {

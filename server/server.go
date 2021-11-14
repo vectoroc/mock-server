@@ -2,19 +2,18 @@ package server
 
 import (
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/hlog"
 	"github.com/rs/zerolog/log"
 	"mock-server/matcher"
 	"mock-server/model"
 	"net/http"
 	"net/http/httputil"
-	"sync"
 	"time"
 )
 
 type Server struct {
-	lock   *sync.RWMutex
-	engine *matcher.Engine
-	proxy  *httputil.ReverseProxy
+	engine matcher.Engine
+	proxy  httputil.ReverseProxy
 	logger zerolog.Logger
 
 	apiPrefix string
@@ -24,23 +23,33 @@ type Server struct {
 }
 
 func New(logger zerolog.Logger, apiPrefix string) *Server {
-	return &Server{
-		lock: &sync.RWMutex{},
-		proxy: &httputil.ReverseProxy{
+	s := &Server{
+		proxy: httputil.ReverseProxy{
 			Director: func(request *http.Request) {},
 			ErrorHandler: func(writer http.ResponseWriter, request *http.Request, err error) {
-				log.Err(err).CallerSkipFrame(4).Msg("proxy error")
+				log.Ctx(request.Context()).Err(err).Msg("proxy error")
 			},
 		},
-		engine:    matcher.NewEngine(),
 		logger:    logger,
 		apiPrefix: apiPrefix,
 	}
+	s.InitAPI()
+	s.Middleware(hlog.NewHandler(logger))
+	s.Middleware(hlog.RequestIDHandler("id", ""))
+	s.Middleware(hlog.AccessHandler(accessHandler))
+	return s
 }
 
-func notImplementedError(resp http.ResponseWriter) {
-	log.Print("not implemented")
-	resp.WriteHeader(http.StatusNotImplemented)
+func accessHandler(r *http.Request, status, size int, duration time.Duration) {
+	hlog.FromRequest(r).Info().
+		Str("method", r.Method).
+		Str("url", r.URL.String()).
+		Int("status", status).
+		Int("size", size).
+		Dur("duration", duration).
+		Str("user-agent", r.UserAgent()).
+		Str("remote-addr", r.RemoteAddr).
+		Send()
 }
 
 func (s *Server) matchRequest(req *http.Request) (*model.Expectation, error) {

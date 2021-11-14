@@ -14,7 +14,7 @@ func getExpectationIDs(list []*model.Expectation) (res []string) {
 }
 
 func TestEngine_AddExpectations(t *testing.T) {
-	e := NewEngine()
+	e := &Engine{}
 
 	list := []*model.Expectation{
 		{Id: "2", Priority: 2},

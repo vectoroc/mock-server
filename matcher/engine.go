@@ -8,15 +8,8 @@ import (
 )
 
 type Engine struct {
-	lock         *sync.RWMutex
+	lock         sync.RWMutex
 	expectations []*model.Expectation
-}
-
-func NewEngine() *Engine {
-	return &Engine{
-		lock:         &sync.RWMutex{},
-		expectations: []*model.Expectation{},
-	}
 }
 
 func (e *Engine) Expectations() []*model.Expectation {
