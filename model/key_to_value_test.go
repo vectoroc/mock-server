@@ -15,12 +15,12 @@ func TestKeyToValue_UnmarshalJSON(t *testing.T) {
 		{
 			name:     "object type",
 			data:     `{"a": "1", "b": "2"}`,
-			expected: KeyToValue{Values: map[string]string{"a": "1", "b": "2"}},
+			expected: KeyToValue{"a": "1", "b": "2"},
 		},
 		{
 			name:     "list of KV items",
 			data:     `[{"name": "a", "value": "1"}, {"name": "b", "value": "3"}]`,
-			expected: KeyToValue{Values: map[string]string{"a": "1", "b": "3"}},
+			expected: KeyToValue{"a": "1", "b": "3"},
 		},
 	}
 	for _, test := range tests {

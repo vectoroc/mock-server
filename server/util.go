@@ -6,16 +6,16 @@ import (
 )
 
 func httpCookieToKeyToValue(cookies []*http.Cookie) model.KeyToValue {
-	res := model.KeyToValue{Values: make(map[string]string, len(cookies))}
+	res := model.KeyToValue{}
 	for _, c := range cookies {
-		res.Values[c.Name] = c.Value
+		res[c.Name] = c.Value
 	}
 	return res
 }
 
 func httpHeadersToKeyToMultiValue(req *http.Request) model.KeyToMultiValue {
 	// http.Request does not contain Host header ? TODO: test it
-	res := model.KeyToMultiValue{Values: req.Header.Clone()}
-	res.Values["Host"] = []string{req.Host}
+	res := model.KeyToMultiValue(req.Header.Clone())
+	res["Host"] = []string{req.Host}
 	return res
 }

@@ -15,17 +15,17 @@ func TestKeyToMultiValue_UnmarshalJSON(t *testing.T) {
 		{
 			name:     "object type",
 			data:     `{"a": "1", "b": "2"}`,
-			expected: KeyToMultiValue{Values: map[string][]string{"a": []string{"1"}, "b": []string{"2"}}},
+			expected: KeyToMultiValue{"a": []string{"1"}, "b": []string{"2"}},
 		},
 		{
 			name:     "object with arrays and strings",
 			data:     `{"a": ["1", "3"], "b": "2"}`,
-			expected: KeyToMultiValue{Values: map[string][]string{"a": []string{"1", "3"}, "b": []string{"2"}}},
+			expected: KeyToMultiValue{"a": []string{"1", "3"}, "b": []string{"2"}},
 		},
 		{
 			name:     "list of KV items",
 			data:     `[{"name": "a", "values": ["1", "2"]}, {"name": "b", "values": ["3", "4"]}]`,
-			expected: KeyToMultiValue{Values: map[string][]string{"a": []string{"1", "2"}, "b": []string{"3", "4"}}},
+			expected: KeyToMultiValue{"a": []string{"1", "2"}, "b": []string{"3", "4"}},
 		},
 	}
 	for _, test := range tests {

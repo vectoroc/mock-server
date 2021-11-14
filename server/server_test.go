@@ -63,9 +63,7 @@ func TestProcessHttpResponse(t *testing.T) {
 		response := &model.HttpResponse{
 			StatusCode: 302,
 			Headers: model.KeyToMultiValue{
-				Values: map[string][]string{
-					"Location": {"https://www.test.com/redirect"},
-				},
+				"Location": {"https://www.test.com/redirect"},
 			},
 		}
 
@@ -84,9 +82,7 @@ func TestProcessHttpResponse(t *testing.T) {
 	t.Run("headers should be canonicalized", func(t *testing.T) {
 		response := &model.HttpResponse{
 			Headers: model.KeyToMultiValue{
-				Values: map[string][]string{
-					"x-myApp-Header": {"token12412421"},
-				},
+				"x-myApp-Header": {"token12412421"},
 			},
 		}
 
@@ -124,9 +120,7 @@ func TestProcessHttpResponse(t *testing.T) {
 	t.Run("cookies", func(t *testing.T) {
 		response := &model.HttpResponse{
 			Cookies: model.KeyToValue{
-				Values: map[string]string{
-					"sessionid": "some-secret",
-				},
+				"sessionid": "some-secret",
 			},
 		}
 
@@ -207,7 +201,7 @@ func TestServer(t *testing.T) {
 	t.Run("simple proxy request", func(t *testing.T) {
 		wg := sync.WaitGroup{}
 		ch := make(chan string, 100)
-		for i := 0; i < 50; i++ {
+		for i := 0; i < 100; i++ {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
@@ -227,7 +221,7 @@ func TestServer(t *testing.T) {
 
 		for i := 0; i < 10000; i++ {
 			delay := i%50 + 1
-			if i%1000 == 0 {
+			if i%100 == 0 {
 				delay = 10000
 			}
 			ch <- "/some/simple/request?foo=bar&delay=" + strconv.Itoa(delay)
@@ -248,6 +242,7 @@ func TestServer(t *testing.T) {
 			body, err := io.ReadAll(resp.Body)
 			require.NoError(t, err)
 
+			assert.Equal(t, "simple-expectation", resp.Header.Get("x-mock-server"))
 			assert.Equal(t, "test mock server", string(body))
 		}
 	})
@@ -371,13 +366,16 @@ func clearExpectation(t *testing.T, mockServerURL string, expectation io.Reader)
 
 func initSimpleExpectation(t *testing.T, mockServerURL string, i int) {
 	newExp := fmt.Sprintf(`{
-  "httpRequest" : {
-    "method" : "GET",
-    "path" : "/test/%d"
+  "httpRequest": {
+    "method": "GET",
+    "path": "/test/%d"
   },
-  "httpResponse" : {
-    "statusCode" : 200,
-    "body" : "test mock server"
+  "httpResponse": {
+    "statusCode": 200,
+    "body": "test mock server",
+    "headers": {
+      "x-mock-server": "simple-expectation"
+    }
   }
 }`, i)
 

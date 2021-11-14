@@ -9,7 +9,7 @@ import (
 // NormalizeRequest makes it possible to match GET and get requests, Content-Type and content-type headers and so on
 func NormalizeRequest(req *model.HttpRequest) {
 	replace := make(map[string]string)
-	for k := range req.Headers.Values {
+	for k := range req.Headers {
 		canonical := http.CanonicalHeaderKey(k)
 		if k != canonical {
 			replace[k] = canonical
@@ -17,8 +17,8 @@ func NormalizeRequest(req *model.HttpRequest) {
 	}
 
 	for k, canon := range replace {
-		req.Headers.Values[canon] = req.Headers.Values[k]
-		delete(req.Headers.Values, k)
+		req.Headers[canon] = req.Headers[k]
+		delete(req.Headers, k)
 	}
 
 	req.Method = strings.ToUpper(req.Method)

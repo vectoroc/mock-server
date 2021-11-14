@@ -75,13 +75,13 @@ func ProcessHttpResponse(ctx context.Context, r *model.HttpResponse, w http.Resp
 		return
 	}
 
-	for name, values := range r.Headers.Values {
+	for name, values := range r.Headers {
 		for _, v := range values {
 			w.Header().Add(name, v)
 		}
 	}
 
-	for name, value := range r.Cookies.Values {
+	for name, value := range r.Cookies {
 		c := &http.Cookie{Name: name, Value: value}
 		http.SetCookie(w, c)
 	}

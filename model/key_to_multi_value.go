@@ -5,15 +5,13 @@ import (
 	"fmt"
 )
 
-type KeyToMultiValue struct {
-	Values map[string][]string
-}
+type KeyToMultiValue map[string][]string
 
 func (kv *KeyToMultiValue) MarshalJSON() ([]byte, error) {
-	if len(kv.Values) == 0 {
+	if kv == nil || len(*kv) == 0 {
 		return []byte("{}"), nil
 	}
-	return json.Marshal(kv.Values)
+	return json.Marshal(map[string][]string(*kv))
 }
 
 func (kv *KeyToMultiValue) UnmarshalJSON(data []byte) error {
@@ -22,13 +20,11 @@ func (kv *KeyToMultiValue) UnmarshalJSON(data []byte) error {
 		Values []string
 	}
 
-	if kv.Values == nil {
-		kv.Values = make(map[string][]string)
-	}
+	*kv = KeyToMultiValue{}
 
 	if err := json.Unmarshal(data, &list); err == nil {
 		for _, item := range list {
-			kv.Values[item.Name] = item.Values
+			(*kv)[item.Name] = item.Values
 		}
 
 		return nil
@@ -42,13 +38,13 @@ func (kv *KeyToMultiValue) UnmarshalJSON(data []byte) error {
 	for k, val := range m {
 		switch casted := val.(type) {
 		case string:
-			kv.Values[k] = []string{casted}
+			(*kv)[k] = []string{casted}
 
 		case []interface{}:
-			kv.Values[k] = make([]string, len(casted))
+			(*kv)[k] = make([]string, len(casted))
 			var ok bool
 			for i, item := range casted {
-				kv.Values[k][i], ok = item.(string)
+				(*kv)[k][i], ok = item.(string)
 				if !ok {
 					return fmt.Errorf("expected string, got %T, %w", item, ErrBadFormat)
 				}
