@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 type KeyToMultiValue struct {
@@ -49,12 +50,12 @@ func (kv *KeyToMultiValue) UnmarshalJSON(data []byte) error {
 			for i, item := range casted {
 				kv.Values[k][i], ok = item.(string)
 				if !ok {
-					return ErrBadFormat
+					return fmt.Errorf("expected string, got %T, %w", item, ErrBadFormat)
 				}
 			}
 
 		default:
-			return ErrBadFormat
+			return fmt.Errorf("unexpected type %T, %w", val, ErrBadFormat)
 		}
 	}
 

@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 // BodyWithContentType - response body
@@ -48,7 +49,7 @@ func unmarshalMap(b *BodyWithContentType, data map[string]interface{}, message j
 	}
 
 	if b.Type, ok = typeVal.(string); !ok {
-		return ErrBadFormat
+		return fmt.Errorf("type is not a string %w", ErrBadFormat)
 	}
 
 	b.ContentType, _ = data["contentType"].(string)
@@ -69,7 +70,7 @@ func unmarshalMap(b *BodyWithContentType, data map[string]interface{}, message j
 	}
 
 	if !ok {
-		return ErrBadFormat
+		return fmt.Errorf("unknown body type %s, %w", b.Type, ErrBadFormat)
 	}
 
 	return nil
