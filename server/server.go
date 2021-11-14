@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/hlog"
 	"github.com/rs/zerolog/log"
@@ -68,8 +69,11 @@ func (s *Server) matchRequest(req *http.Request) (*model.Expectation, error) {
 	return nil, nil
 }
 
-func ProcessHttpResponse(r *model.HttpResponse, w http.ResponseWriter) {
-	ProccessDelay(r.Delay)
+func ProcessHttpResponse(ctx context.Context, r *model.HttpResponse, w http.ResponseWriter) {
+	ProccessDelay(ctx, r.Delay)
+	if ctx.Err() != nil {
+		return
+	}
 
 	for name, values := range r.Headers.Values {
 		for _, v := range values {
@@ -123,8 +127,11 @@ func ProcessHttpResponse(r *model.HttpResponse, w http.ResponseWriter) {
 	}
 }
 
-func ProcessHttpError(r *model.HttpError, w http.ResponseWriter) {
-	ProccessDelay(r.Delay)
+func ProcessHttpError(ctx context.Context, r *model.HttpError, w http.ResponseWriter) {
+	ProccessDelay(ctx, r.Delay)
+	if ctx.Err() != nil {
+		return
+	}
 
 	if r.ResponseBytes > "" {
 		_, err := w.Write([]byte(r.ResponseBytes))
@@ -151,7 +158,7 @@ func ProcessHttpError(r *model.HttpError, w http.ResponseWriter) {
 	}
 }
 
-func ProccessDelay(d model.Delay) {
+func ProccessDelay(ctx context.Context, d model.Delay) {
 	if d.Value == 0 {
 		return
 	}
@@ -175,5 +182,9 @@ func ProccessDelay(d model.Delay) {
 		res *= time.Nanosecond
 	}
 
-	time.Sleep(res)
+	t := time.NewTimer(res)
+	select {
+	case <-t.C:
+	case <-ctx.Done():
+	}
 }

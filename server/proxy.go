@@ -46,12 +46,12 @@ func (s *Server) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	switch {
 	case expect.HttpResponse != nil:
 		log.Print("replace response")
-		ProcessHttpResponse(expect.HttpResponse, resp)
+		ProcessHttpResponse(req.Context(), expect.HttpResponse, resp)
 		return
 
 	case expect.HttpError != nil:
 		log.Print("replace response, error")
-		ProcessHttpError(expect.HttpError, resp)
+		ProcessHttpError(req.Context(), expect.HttpError, resp)
 		return
 
 	default:

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"github.com/stretchr/testify/assert"
 	"mock-server/model"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 )
 
 func TestProcessHttpResponse(t *testing.T) {
+	ctx := context.Background()
 	t.Run("default status code is 200", func(t *testing.T) {
 		response := &model.HttpResponse{
 			Body: model.BodyWithContentType{
@@ -18,7 +20,7 @@ func TestProcessHttpResponse(t *testing.T) {
 		}
 
 		respRecorer := httptest.NewRecorder()
-		ProcessHttpResponse(response, respRecorer)
+		ProcessHttpResponse(ctx, response, respRecorer)
 
 		result := respRecorer.Result()
 
@@ -37,7 +39,7 @@ func TestProcessHttpResponse(t *testing.T) {
 		}
 
 		respRecorer := httptest.NewRecorder()
-		ProcessHttpResponse(response, respRecorer)
+		ProcessHttpResponse(ctx, response, respRecorer)
 
 		result := respRecorer.Result()
 
@@ -57,7 +59,7 @@ func TestProcessHttpResponse(t *testing.T) {
 		}
 
 		respRecorer := httptest.NewRecorder()
-		ProcessHttpResponse(response, respRecorer)
+		ProcessHttpResponse(ctx, response, respRecorer)
 
 		result := respRecorer.Result()
 
@@ -78,7 +80,7 @@ func TestProcessHttpResponse(t *testing.T) {
 		}
 
 		respRecorer := httptest.NewRecorder()
-		ProcessHttpResponse(response, respRecorer)
+		ProcessHttpResponse(ctx, response, respRecorer)
 
 		result := respRecorer.Result()
 
@@ -97,7 +99,7 @@ func TestProcessHttpResponse(t *testing.T) {
 		}
 
 		respRecorer := httptest.NewRecorder()
-		ProcessHttpResponse(response, respRecorer)
+		ProcessHttpResponse(ctx, response, respRecorer)
 
 		result := respRecorer.Result()
 
@@ -118,7 +120,7 @@ func TestProcessHttpResponse(t *testing.T) {
 		}
 
 		respRecorer := httptest.NewRecorder()
-		ProcessHttpResponse(response, respRecorer)
+		ProcessHttpResponse(ctx, response, respRecorer)
 
 		result := respRecorer.Result()
 
