@@ -1,21 +1,31 @@
 package server
 
 import (
-	"github.com/rs/zerolog/hlog"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"io"
 	"net"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 )
 
 func (s *Server) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+	log := zerolog.Ctx(req.Context())
+	now := time.Now()
+
 	if cb, ok := s.apiRoutes[req.URL.Path]; ok && req.Method == "PUT" {
+		defer func() {
+			APIDurations.WithLabelValues(pathToMethod(req.URL.Path, s.apiPrefix)).Observe(time.Since(now).Seconds())
+		}()
+
 		cb(resp, req)
 		return
 	}
-
-	log := hlog.FromRequest(req)
+	defer func() {
+		ProxyDurations.Observe(time.Since(now).Seconds())
+	}()
 
 	// match expectation
 	expect, err := s.matchRequest(req)
@@ -56,11 +66,12 @@ func (s *Server) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 
 	default:
 		log.Error().Msg("not implemented")
-		notImplementedError(resp)
+		s.notImplemented(resp, req)
 	}
 }
 
 func internalError(resp http.ResponseWriter, err error) {
+	Codes.WithLabelValues(strconv.Itoa(http.StatusInternalServerError)).Inc()
 	resp.WriteHeader(http.StatusInternalServerError)
 	if _, err := resp.Write([]byte(err.Error())); err != nil {
 		log.Err(err)
@@ -68,7 +79,7 @@ func internalError(resp http.ResponseWriter, err error) {
 }
 
 func ConnectMethod(rw http.ResponseWriter, req *http.Request) {
-	log := hlog.FromRequest(req)
+	log := zerolog.Ctx(req.Context())
 
 	hij, ok := rw.(http.Hijacker)
 	if !ok {
@@ -127,4 +138,19 @@ func ConnectMethod(rw http.ResponseWriter, req *http.Request) {
 
 	proxyConn.Close()
 	clientConn.Close()
+}
+
+// pathToMethod returns API method name to be called
+func pathToMethod(path string, prefix string) string {
+	if strings.HasPrefix(path, prefix) {
+		path = path[len(prefix):]
+	}
+
+	parts := strings.SplitN(strings.TrimLeft(path, "/"), "/", 1)
+	switch len(parts) {
+	case 0:
+		return "unknown"
+	default:
+		return parts[0]
+	}
 }

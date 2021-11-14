@@ -5,6 +5,7 @@ import (
 	"github.com/rs/zerolog"
 	"mock-server/model"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -26,12 +27,14 @@ func (s *Server) Expectation(rw http.ResponseWriter, req *http.Request) {
 	log := zerolog.Ctx(req.Context())
 
 	params := &model.Expectations{}
-	if !s.validateAPIRequest(rw, req, &params) {
+	if !s.validateAPIRequest(rw, req, params) {
 		return
 	}
 	list := params.ToArray()
 	s.engine.AddExpectations(list)
 	log.Info().Int("added", len(list)).Send()
+
+	ExpectationsAdd.Add(float64(len(list)))
 	s.responseJSON(rw, http.StatusCreated, list)
 }
 
@@ -39,11 +42,13 @@ func (s *Server) Clear(rw http.ResponseWriter, req *http.Request) {
 	log := zerolog.Ctx(req.Context())
 
 	exp := &model.HttpRequest{}
-	if !s.validateAPIRequest(rw, req, &exp) {
+	if !s.validateAPIRequest(rw, req, exp) {
 		return
 	}
 	ids := s.engine.ClearBy(exp)
 	log.Info().Int("expectations", len(ids)).Send()
+
+	ExpectationsClear.Add(float64(len(ids)))
 	s.responseJSON(rw, http.StatusOK, ids)
 }
 
@@ -114,24 +119,24 @@ func (s *Server) validateAPIRequest(rw http.ResponseWriter, req *http.Request, p
 }
 
 func (s *Server) responseJSON(rw http.ResponseWriter, status int, data interface{}) {
-	rw.WriteHeader(status)
-	resp, err := json.Marshal(data)
+	s.responseStatus(rw, status)
+	enc := json.NewEncoder(rw)
+	enc.SetIndent("", " ")
+	err := enc.Encode(data)
 	if err != nil {
 		s.logger.Err(err).Msg("failed to marshal json response")
-	}
-	if _, err := rw.Write(resp); err != nil {
-		s.logger.Err(err).Msg("failed to send json response")
 	}
 }
 
 func (s *Server) responseText(rw http.ResponseWriter, status int, resp string) {
-	rw.WriteHeader(status)
+	s.responseStatus(rw, status)
 	if _, err := rw.Write([]byte(resp)); err != nil {
 		s.logger.Err(err).Msg("failed to send json response")
 	}
 }
 
 func (s *Server) responseStatus(rw http.ResponseWriter, status int) {
+	Codes.WithLabelValues(strconv.Itoa(status)).Inc()
 	rw.WriteHeader(status)
 }
 
