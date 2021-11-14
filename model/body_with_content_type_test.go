@@ -46,6 +46,6 @@ func TestBodyWithContentType_UnmarshalJSON(t *testing.T) {
 		res := &BodyWithContentType{}
 
 		err := json.Unmarshal([]byte(data), res)
-		assert.Equal(t, ErrBadFormat, err)
+		assert.ErrorIs(t, err, ErrBadFormat)
 	})
 }
